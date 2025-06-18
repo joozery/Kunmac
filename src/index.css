@@ -1,0 +1,180 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 3%; 
+  --foreground: 45 90% 88%; 
+  --card: 0 0% 8%; 
+  --card-foreground: 45 90% 88%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 45 90% 88%;
+  --primary: 45 100% 55%; 
+  --primary-foreground: 0 0% 5%; 
+  --secondary: 0 0% 12%; 
+  --secondary-foreground: 45 90% 88%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 45 40% 75%; 
+  --accent: 45 100% 55%;
+  --accent-foreground: 0 0% 5%;
+  --destructive: 0 70% 55%; 
+  --destructive-foreground: 0 0% 98%;
+  --border: 45 60% 40%; 
+  --input: 45 60% 40%;
+  --ring: 45 100% 55%;
+  --radius: 0.75rem; 
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Prompt', sans-serif;
+}
+
+.thai-pattern {
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(218, 165, 32, 0.08) 0%, transparent 40%), 
+    radial-gradient(circle at 85% 85%, rgba(218, 165, 32, 0.06) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='rgba(218, 165, 32, 0.03)' fill-opacity='0.4'%3E%3Cpath d='M30 0c16.568 0 30 13.432 30 30S46.568 60 30 60C13.432 60 0 46.568 0 30S13.432 0 30 0zm0 6a24 24 0 100 48 24 24 0 000-48z'/%3E%3Cpath d='M30 12a18 18 0 100 36 18 18 0 000-36zm0 6a12 12 0 100 24 12 12 0 000-24z'/%3E%3Cpath d='M30 24a6 6 0 100 12 6 6 0 000-12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px, 120px 120px, 60px 60px;
+  position: relative;
+}
+
+.thai-pattern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      30deg,
+      transparent,
+      transparent 3px,
+      rgba(218, 165, 32, 0.015) 3px, 
+      rgba(218, 165, 32, 0.015) 6px 
+    ),
+    repeating-linear-gradient(
+      -30deg,
+      transparent,
+      transparent 3px,
+      rgba(218, 165, 32, 0.015) 3px,
+      rgba(218, 165, 32, 0.015) 6px
+    );
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #FFEB3B 0%, #FFD700 30%, #FFA000 70%, #FF6F00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gold-border {
+  border-width: 2px;
+  border-style: solid;
+  border-image: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00) 1;
+}
+
+.glass-effect {
+  background: rgba(10, 10, 10, 0.5); 
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(218, 165, 32, 0.25); 
+}
+
+.luxury-shadow {
+  box-shadow: 
+    0 0 30px rgba(218, 165, 32, 0.15), 
+    0 15px 50px rgba(0, 0, 0, 0.4);
+}
+
+.text-shadow-gold {
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.4), 0 0 5px rgba(255, 215, 0, 0.2);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); } 
+}
+
+.float-animation {
+  animation: float 3.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -250% 0; } 
+  100% { background-position: 250% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.25), 
+    transparent
+  );
+  background-size: 250% 100%; 
+  animation: shimmer 2.5s infinite; 
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 10px; 
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border-radius: 5px; 
+  border: 2px solid hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: hsl(var(--primary)) !important;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  width: 40px !important;
+  height: 40px !important;
+  transition: background-color 0.3s ease;
+}
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background-color: rgba(0,0,0,0.7);
+}
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 1.2rem !important;
+  font-weight: bold;
+}
+
+.swiper-pagination-bullet {
+  background-color: hsl(var(--primary)) !important;
+  opacity: 0.5 !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.swiper-pagination-bullet-active {
+  opacity: 1 !important;
+  transform: scale(1.2);
+}
