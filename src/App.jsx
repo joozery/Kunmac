@@ -16,7 +16,7 @@ import CarDetailModal from '@/components/CarDetailModal';
 import carImage1 from './assets/car1.jpg';
 import carImage2 from './assets/car2.jpg';
 import carImage3 from './assets/car3.jpg';
-import carImage4 from './assets/car5.png';
+import carImage4 from './assets/car6.jpg';
 
 function App() {
   const [isContactModalOpen, setIsContactModalOpen] = React.useState(false);
