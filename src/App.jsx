@@ -16,7 +16,7 @@ import CarDetailModal from '@/components/CarDetailModal';
 import carImage1 from './assets/car1.jpg';
 import carImage2 from './assets/car2.jpg';
 import carImage3 from './assets/car3.jpg';
-import carImage4 from './assets/car4.jpg';
+import carImage4 from './assets/car5.png';
 
 function App() {
   const [isContactModalOpen, setIsContactModalOpen] = React.useState(false);
@@ -158,7 +158,6 @@ function App() {
       <Header onContactClick={handleOpenContactModal} />
       <HeroSection onBookingClick={() => handleBooking(null)} onContactClick={handleOpenContactModal} />
       <FeaturesSection />
-      <ServicesSection onBookingClick={() => handleBooking(null)} />
       <CarGallerySection carModels={carModels} onBookingClick={handleBooking} />
       <OurWorkGallerySection images={portfolioImages} />
       <ContactSection onContactClick={handleOpenContactModal} />

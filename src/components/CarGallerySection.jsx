@@ -12,7 +12,7 @@ import 'swiper/css/pagination';
 
 const CarModelCard = ({ model, onBookingClick }) => {
   return (
-    <div className="bg-gray-900/60 backdrop-blur-lg border-2 border-yellow-400/40 rounded-2xl overflow-hidden luxury-shadow flex flex-col h-full ">
+    <div className="bg-gray-900/ backdrop-blur-lg border-2 border-yellow-400/40 rounded-2xl overflow-hidden luxury-shadow flex flex-col h-full ">
       <div className="relative h-60 overflow-hidden">
         <img    
           class="w-full h-full object-cover transition-transform duration-500 hover:scale-110 shimmer" 
@@ -77,7 +77,7 @@ const CarGallerySection = ({ carModels, onBookingClick }) => {
   }, []);
 
   return (
-    <section id="รถของเรา" className="py-20 bg-gradient-to-b from-gray-900/80 to-black ">
+    <section id="รถของเรา" className="py-20 bg-gradient-to-b from-gray-900/ to-black ">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

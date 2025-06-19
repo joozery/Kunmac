@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Car, Users, Shield, Clock } from 'lucide-react';
+import bgImage from '../assets/your-bg.jpg'; // ✅ ปรับ path ให้ถูก
 
 const features = [
   {
@@ -27,8 +28,19 @@ const features = [
 
 const FeaturesSection = () => {
   return (
-    <section id="บริการ" className="py-20 bg-gradient-to-b from-black to-gray-900">
-      <div className="container mx-auto px-4">
+    <section
+      id="บริการ"
+      className="py-20 relative"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* overlay เพื่อทำให้ bg มืดลงและตัวอักษรชัด */}
+      <div className="absolute inset-0 bg-black/70"></div>
+
+      <div className="container relative z-10 mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -42,7 +42,7 @@ const OurWorkGallerySection = ({ images }) => {
 
 
   return (
-    <section id="ผลงานของเรา" className="py-20 bg-gradient-to-b from-black to-gray-900/90 thai-pattern">
+    <section id="ผลงานของเรา" className="py-20 bg-gradient-to-b from-black to-black-900 ">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
