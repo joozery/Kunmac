@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, MessageSquare, Copy } from 'lucide-react';
+import { X, Phone, MessageSquare, Copy, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 
@@ -45,10 +44,18 @@ const ContactModal = ({ isOpen, onClose, contactDetails }) => {
       icon: MessageSquare,
       label: "WhatsApp",
       value: contactDetails.whatsapp,
-      href: `https://wa.me/${contactDetails.phones[0].replace(/-/g, '')}`, // Assuming WhatsApp uses the first phone number
+      href: `https://wa.me/${contactDetails.phones[0].replace(/-/g, '')}`,
       actionText: "แชท WhatsApp",
       copyType: "WhatsApp"
     },
+    {
+      icon: Facebook, // ✅ icon facebook
+      label: "Facebook",
+      value: "เช่ารถ Alphard Thailand",
+      href: "https://www.facebook.com/Aocza?mibextid=wwXIfr&mibextid=wwXIfr",
+      actionText: "เปิด Facebook",
+      copyType: "Facebook"
+    }
   ];
 
   return (
