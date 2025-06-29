@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Car, Menu, X } from 'lucide-react';
@@ -25,34 +24,48 @@ const Header = ({ onContactClick }) => {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
           <motion.a 
-  href="#หน้าแรก"
-  className="flex items-center space-x-3"
-  whileHover={{ scale: 1.05 }}
->
-  <img 
-    src={logoImage}
-    alt="AlphardRent Logo"
-    className="w-12 h-12 object-contain"
-  />
-  <div>
-    <h1 className="text-2xl font-bold gold-gradient">AlphardRent</h1>
-    <p className="text-xs text-yellow-300/80 tracking-wide">บริการเช่ารถหรูพร้อมคนขับ</p>
-  </div>
-</motion.a>
+            onClick={() => window.location.replace('/')}
+            className="flex items-center space-x-3 cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+          >
+            <img 
+              src={logoImage}
+              alt="AlphardRent Logo"
+              className="w-12 h-12 object-contain"
+            />
+            <div>
+              <h1 className="text-2xl font-bold gold-gradient">AlphardRent</h1>
+              <p className="text-xs text-yellow-300/80 tracking-wide">บริการเช่ารถหรูพร้อมคนขับ</p>
+            </div>
+          </motion.a>
             
             <nav className="hidden md:flex space-x-6">
               {navItems.map((item, index) => (
-                <motion.a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-yellow-200 hover:text-yellow-400 transition-colors font-medium text-shadow-gold text-sm"
-                  whileHover={{ scale: 1.1, textShadow: "0 0 8px rgba(255,215,0,0.7)" }}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 + 0.2 }}
-                >
-                  {item}
-                </motion.a>
+                item === 'หน้าแรก' ? (
+                  <motion.a
+                    key={item}
+                    onClick={() => window.location.replace('/')}
+                    className="text-yellow-200 hover:text-yellow-400 transition-colors font-medium text-shadow-gold text-sm cursor-pointer"
+                    whileHover={{ scale: 1.1, textShadow: '0 0 8px rgba(255,215,0,0.7)' }}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 + 0.2 }}
+                  >
+                    {item}
+                  </motion.a>
+                ) : (
+                  <motion.a
+                    key={item}
+                    href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="text-yellow-200 hover:text-yellow-400 transition-colors font-medium text-shadow-gold text-sm"
+                    whileHover={{ scale: 1.1, textShadow: '0 0 8px rgba(255,215,0,0.7)' }}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 + 0.2 }}
+                  >
+                    {item}
+                  </motion.a>
+                )
               ))}
             </nav>
 
@@ -79,22 +92,32 @@ const Header = ({ onContactClick }) => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="fixed inset-x-0 top-20 z-40 md:hidden glass-effect thai-pattern p-4 shadow-xl rounded-b-lg"
+          className="fixed inset-x-0 top-[60px] z-40 md:hidden glass-effect thai-pattern px-2 pt-2 pb-4 shadow-xl rounded-b-lg"
         >
-          <nav className="flex flex-col space-y-4">
+          <nav className="flex flex-col space-y-2">
             {navItems.map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                className="text-yellow-200 hover:text-yellow-400 transition-colors font-medium py-2 text-center rounded-md hover:bg-yellow-400/10"
-                onClick={toggleMobileMenu}
-              >
-                {item}
-              </a>
+              item === 'หน้าแรก' ? (
+                <a
+                  key={item}
+                  onClick={() => { window.location.replace('/'); toggleMobileMenu(); }}
+                  className="text-yellow-200 hover:text-yellow-400 transition-colors font-medium py-2 text-center rounded-md hover:bg-yellow-400/10 mx-1 cursor-pointer"
+                >
+                  {item}
+                </a>
+              ) : (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-yellow-200 hover:text-yellow-400 transition-colors font-medium py-2 text-center rounded-md hover:bg-yellow-400/10 mx-1"
+                  onClick={toggleMobileMenu}
+                >
+                  {item}
+                </a>
+              )
             ))}
             <Button 
               onClick={() => { onContactClick(); toggleMobileMenu(); }}
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold hover:from-yellow-500 hover:to-orange-600 mt-2"
+              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold hover:from-yellow-500 hover:to-orange-600 mt-1 mx-1"
             >
               จองเลย
             </Button>
