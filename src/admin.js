@@ -39,4 +39,15 @@ router.get('/cars', adminAuth, (req, res) => {
   });
 });
 
+router.post('/register', async (req, res) => {
+    const { username, password, name } = req.body;
+    const bcrypt = require('bcrypt');
+    const hash = await bcrypt.hash(password, 10);
+    db.query('INSERT INTO admin_users (username, password_hash, name) VALUES (?, ?, ?)', [username, hash, name], (err, result) => {
+      if (err) return res.status(500).json({ error: 'Server error' });
+      res.json({ success: true, id: result.insertId });
+    });
+  });
+
+
 module.exports = router;
