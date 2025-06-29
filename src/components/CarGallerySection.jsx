@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ const CarModelCard = ({ model, onBookingClick }) => {
     <div className="bg-gray-900/ backdrop-blur-lg border-2 border-yellow-400/40 rounded-2xl overflow-hidden luxury-shadow flex flex-col h-full ">
       <div className="relative h-60 overflow-hidden">
         <img    
-          class="w-full h-full object-cover transition-transform duration-500 hover:scale-110 shimmer" 
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110 shimmer" 
           alt={model.imageAlt}
           src={model.image}
           />

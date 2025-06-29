@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -9,11 +8,25 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
+import { useNavigate } from 'react-router-dom';
+import api from '@/lib/api';
 
-const OurWorkGallerySection = ({ images }) => {
+const OurWorkGallerySection = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [portfolio, setPortfolio] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setLoading(true);
+    api.get('portfolio')
+      .then(res => setPortfolio(res.data))
+      .catch(() => setError('เกิดข้อผิดพลาดในการโหลดข้อมูล'))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -34,12 +47,15 @@ const OurWorkGallerySection = ({ images }) => {
   const navigateLightbox = (direction) => {
     setSelectedImageIndex(prevIndex => {
       const newIndex = prevIndex + direction;
-      if (newIndex < 0) return images.length - 1;
-      if (newIndex >= images.length) return 0;
+      if (newIndex < 0) return portfolio.length - 1;
+      if (newIndex >= portfolio.length) return 0;
       return newIndex;
     });
   };
 
+  if (loading) return <div className="min-h-[300px] flex items-center justify-center text-yellow-200 text-xl">Loading...</div>;
+  if (error) return <div className="min-h-[300px] flex items-center justify-center text-red-400 text-xl">{error}</div>;
+  if (!portfolio.length) return null;
 
   return (
     <section id="ผลงานของเรา" className="py-20 bg-gradient-to-b from-black to-black-900 ">
@@ -92,23 +108,34 @@ const OurWorkGallerySection = ({ images }) => {
             pagination={{ clickable: true, el: '.swiper-pagination-portfolio' }}
             className="pb-16"
           >
-            {images.map((image, index) => (
-              <SwiperSlide key={index} className="h-auto group">
+            {portfolio.map((item, index) => (
+              <SwiperSlide key={item.id} className="h-auto group">
                 <div 
                   className="relative aspect-[16/10] rounded-xl overflow-hidden border-2 border-yellow-400/30 shadow-xl cursor-pointer glass-effect"
                   onClick={() => openLightbox(index)}
                 >
                   <img 
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 shimmer"
-                    alt={image.alt}
-                   src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 shimmer"
+                    alt={item.title}
+                    src={item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1595872018818-97555653a011"} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <Maximize2 className="w-12 h-12 text-yellow-300 transform scale-0 group-hover:scale-100 transition-transform duration-300" />
                   </div>
-                   <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                    <p className="text-xs text-yellow-200/90 truncate">{image.alt}</p>
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                    <div className="text-base font-bold text-yellow-200/95 truncate mb-0.5 drop-shadow">{item.title}</div>
+                    <p className="text-xs text-yellow-200/90 truncate">{item.description}</p>
                   </div>
                 </div>
+                {item.id && (
+                  <div className="flex justify-center mt-2">
+                    <button
+                      className="px-5 py-2 rounded-lg bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-black font-bold shadow hover:from-yellow-500 hover:to-orange-600 transition"
+                      onClick={e => { e.stopPropagation(); navigate(`/portfolio/${item.id}`); }}
+                    >
+                      อ่านเพิ่มเติม
+                    </button>
+                  </div>
+                )}
               </SwiperSlide>
             ))}
           </Swiper>
@@ -123,7 +150,7 @@ const OurWorkGallerySection = ({ images }) => {
       </div>
 
       <AnimatePresence>
-        {lightboxOpen && (
+        {lightboxOpen && portfolio[selectedImageIndex] && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -140,9 +167,14 @@ const OurWorkGallerySection = ({ images }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <img 
-                class="w-full h-full object-contain rounded-lg shadow-2xl"
-                alt={images[selectedImageIndex].alt}
-               src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
+                className="w-full h-full object-contain rounded-lg shadow-2xl"
+                alt={portfolio[selectedImageIndex].title}
+                src={portfolio[selectedImageIndex].images && portfolio[selectedImageIndex].images.length > 0 ? portfolio[selectedImageIndex].images[0] : "https://images.unsplash.com/photo-1595872018818-97555653a011"} />
+              {portfolio[selectedImageIndex].title && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 text-yellow-200 text-lg font-bold px-6 py-2 rounded-md mb-2 drop-shadow-lg">
+                  {portfolio[selectedImageIndex].title}
+                </div>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -170,8 +202,8 @@ const OurWorkGallerySection = ({ images }) => {
               >
                 <ChevronRight size={32} />
               </Button>
-               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-md">
-                {images[selectedImageIndex].alt} ({selectedImageIndex + 1} / {images.length})
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-md">
+                {portfolio[selectedImageIndex].title} ({selectedImageIndex + 1} / {portfolio.length})
               </div>
             </motion.div>
           </motion.div>
@@ -182,3 +214,4 @@ const OurWorkGallerySection = ({ images }) => {
 };
 
 export default OurWorkGallerySection;
+

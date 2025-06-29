@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Phone, Calendar } from 'lucide-react';
@@ -37,7 +36,7 @@ const CarDetailModal = ({ isOpen, onClose, carModel, onContactClick }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="relative h-64 md:h-auto rounded-lg overflow-hidden border border-yellow-400/30">
                 <img 
-                  class="w-full h-full object-cover shimmer"
+                  className="w-full h-full object-cover shimmer"
                   alt={carModel.imageAlt}
                   src={carModel.image} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20"></div>
