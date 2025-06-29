@@ -2,6 +2,11 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Phone, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, A11y } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 const CarDetailModal = ({ isOpen, onClose, carModel, onContactClick }) => {
   if (!carModel) return null;
@@ -35,10 +40,32 @@ const CarDetailModal = ({ isOpen, onClose, carModel, onContactClick }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="relative h-64 md:h-auto rounded-lg overflow-hidden border border-yellow-400/30">
-                <img 
-                  className="w-full h-full object-cover shimmer"
-                  alt={carModel.imageAlt}
-                  src={carModel.image} />
+                {carModel.images && carModel.images.length > 0 ? (
+                  <Swiper
+                    modules={[Navigation, Pagination, A11y]}
+                    spaceBetween={10}
+                    slidesPerView={1}
+                    navigation
+                    pagination={{ clickable: true }}
+                    className="w-full h-full"
+                  >
+                    {carModel.images.map((img, idx) => (
+                      <SwiperSlide key={idx}>
+                        <img
+                          className="w-full h-full object-cover shimmer"
+                          alt={carModel.name + ' ' + (idx + 1)}
+                          src={img}
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                ) : (
+                  <img
+                    className="w-full h-full object-cover shimmer"
+                    alt={carModel.imageAlt}
+                    src={carModel.image}
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20"></div>
               </div>
 

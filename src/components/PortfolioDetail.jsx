@@ -34,7 +34,7 @@ export default function PortfolioDetail() {
       <main className="flex-1 py-12 px-4">
         <div className="max-w-3xl mx-auto bg-black/80 rounded-2xl shadow-lg p-0 md:p-0 flex flex-col gap-0">
           <Button asChild variant="ghost" className="mb-6 w-fit text-yellow-300 hover:bg-yellow-400/10 hover:text-yellow-500">
-            <Link to="/portfolio"><ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้ารวมผลงาน</Link>
+            <Link to="/"><ArrowLeft className="w-4 h-4 mr-2" /> กลับไปหน้าแรก</Link>
           </Button>
           {/* Gallery/Slider */}
           {item.images && item.images.length > 0 && (

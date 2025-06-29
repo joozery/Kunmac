@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiTruck, FiUpload, FiCheckCircle, FiX } from "react-icons/fi";
+import api from '@/lib/api';
+import Swal from 'sweetalert2';
+import { useLocation } from 'react-router-dom';
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 export default function AddCar({ onAdd }) {
   const [form, setForm] = useState({
-    image: null,
-    imagePreview: "",
+    images: [],
+    imagePreviews: [],
     name: "",
     desc: "",
     features: [""],
@@ -12,31 +19,105 @@ export default function AddCar({ onAdd }) {
     conditions: [""],
     status: "พร้อมให้บริการ",
   });
+  const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const query = useQuery();
+
+  // ดึงข้อมูลรถถ้าเป็นโหมดแก้ไข
+  useEffect(() => {
+    const id = query.get('id');
+    console.log('edit id:', id); // debug id
+    if (id) {
+      setEditId(id);
+      setLoading(true);
+      api.get(`cars/${id}`)
+        .then(res => {
+          console.log('car data:', res.data); // debug data
+          const car = res.data;
+          if (!car || !car.id) {
+            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลรถ' });
+            return;
+          }
+          setForm({
+            images: [],
+            imagePreviews: Array.isArray(car.images) ? car.images : [],
+            name: car.name || "",
+            desc: car.desc || "",
+            features: Array.isArray(car.features) && car.features.length ? car.features : [""],
+            prices: Array.isArray(car.prices) && car.prices.length ? car.prices : [""],
+            conditions: Array.isArray(car.conditions) && car.conditions.length ? car.conditions : [""],
+            status: car.status || "พร้อมให้บริการ",
+          });
+        })
+        .catch((err) => {
+          console.log('API error:', err);
+          if (err.response && err.response.status === 404) {
+            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลรถ' });
+          }
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [query]);
 
   const handleFormChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
   const handleArrayChange = (field, idx, value) => setForm(f => ({ ...f, [field]: f[field].map((v, i) => i === idx ? value : v) }));
   const addArrayField = (field) => setForm(f => ({ ...f, [field]: [...f[field], ""] }));
   const removeArrayField = (field, idx) => setForm(f => ({ ...f, [field]: f[field].filter((_, i) => i !== idx) }));
-  const handleImage = e => {
-    const file = e.target.files[0];
-    if (file) {
-      setForm(f => ({ ...f, image: file }));
+
+  // handle multiple images
+  const handleImages = e => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    // preview
+    files.forEach(file => {
       const reader = new FileReader();
-      reader.onload = ev => setForm(f => ({ ...f, imagePreview: ev.target.result }));
+      reader.onload = ev => {
+        setForm(f => ({
+          ...f,
+          images: [...f.images, file],
+          imagePreviews: [...f.imagePreviews, ev.target.result]
+        }));
+      };
       reader.readAsDataURL(file);
-    }
+    });
   };
 
-  const handleSubmit = e => {
+  const removeImage = idx => {
+    setForm(f => ({
+      ...f,
+      images: f.images.filter((_, i) => i !== idx),
+      imagePreviews: f.imagePreviews.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (onAdd) {
-      onAdd({
-        ...form,
-        id: Date.now(),
-        image: form.imagePreview,
-      });
+    try {
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('desc', form.desc);
+      formData.append('features', JSON.stringify(form.features.filter(f => f)));
+      formData.append('prices', JSON.stringify(form.prices.filter(p => p)));
+      formData.append('conditions', JSON.stringify(form.conditions.filter(c => c)));
+      formData.append('status', form.status);
+      form.images.forEach(img => formData.append('images', img));
+      // ถ้าแก้ไข ส่ง keepImages เป็น array ของ url เดิมที่ต้องการเก็บไว้
+      if (editId) {
+        formData.append('keepImages', JSON.stringify(form.imagePreviews.filter(url => typeof url === 'string' && url.startsWith('http'))));
+        await api.put(`cars/${editId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        Swal.fire({ icon: 'success', title: 'แก้ไขข้อมูลรถสำเร็จ!', showConfirmButton: false, timer: 1500 });
+      } else {
+        await api.post('cars', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        Swal.fire({ icon: 'success', title: 'เพิ่มรถสำเร็จ!', showConfirmButton: false, timer: 1500 });
+      }
+      setForm({ images: [], imagePreviews: [], name: "", desc: "", features: [""], prices: [""], conditions: [""], status: "พร้อมให้บริการ" });
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.response?.data?.error || err.message });
     }
-    setForm({ image: null, imagePreview: "", name: "", desc: "", features: [""], prices: [""], conditions: [""], status: "พร้อมให้บริการ" });
   };
 
   return (
@@ -51,16 +132,23 @@ export default function AddCar({ onAdd }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* คอลัมน์ 1: อัปโหลดรูป */}
           <div className="flex flex-col gap-2">
-            <label className="block font-semibold text-gray-800 mb-1">รูปภาพรถ</label>
+            <label className="block font-semibold text-gray-800 mb-1">รูปภาพรถ (อัปโหลดได้หลายรูป)</label>
             <label className="flex items-center gap-2 cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg w-fit">
               <FiUpload />
-              <span>{form.image ? (form.image.name || "เลือกรูปใหม่") : "เลือกไฟล์"}</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
+              <span>เลือกรูป (เลือกได้หลายไฟล์)</span>
+              <input type="file" accept="image/*" multiple className="hidden" onChange={handleImages} />
             </label>
-            {form.imagePreview && (
-              <img src={form.imagePreview} alt="preview" className="w-32 h-24 object-cover rounded-lg border border-blue-100 shadow mt-2" />
+            {form.imagePreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {form.imagePreviews.map((src, idx) => (
+                  <div key={idx} className="relative group">
+                    <img src={src} alt={`preview-${idx}`} className="w-24 h-20 object-cover rounded-lg border border-blue-100 shadow" />
+                    <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-red-500 opacity-0 group-hover:opacity-100 transition"><FiX /></button>
+                  </div>
+                ))}
+              </div>
             )}
-            {form.image && <span className="text-green-600 text-xs flex items-center gap-1 mt-1"><FiCheckCircle /> อัปโหลดแล้ว</span>}
+            {form.images.length > 0 && <span className="text-green-600 text-xs flex items-center gap-1 mt-1"><FiCheckCircle /> อัปโหลดแล้ว {form.images.length} รูป</span>}
           </div>
           {/* คอลัมน์ 2: ชื่อรถ + รายละเอียด */}
           <div className="flex flex-col gap-2">

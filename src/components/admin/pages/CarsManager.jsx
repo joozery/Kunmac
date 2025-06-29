@@ -1,11 +1,8 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import api from "@/lib/api";
 import { useNavigate } from "react-router-dom";
-import { FiTruck, FiPlus, FiTrash2, FiX, FiUpload, FiCheckCircle, FiImage } from "react-icons/fi";
-
-const initialCars = [
-  { id: 1, name: "Alphard 2023", price: "7,000", status: "พร้อมให้บริการ", image: null },
-  { id: 2, name: "Commuter 2024", price: "3,500", status: "พร้อมให้บริการ", image: null },
-];
+import { FiTruck, FiPlus, FiTrash2, FiX, FiUpload, FiCheckCircle, FiImage, FiEdit2 } from "react-icons/fi";
+import Swal from 'sweetalert2';
 
 function StatusBadge({ status }) {
   const color = status === "พร้อมให้บริการ" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500";
@@ -13,7 +10,9 @@ function StatusBadge({ status }) {
 }
 
 export default function CarsManager() {
-  const [cars, setCars] = useState(initialCars);
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     image: null,
@@ -26,7 +25,18 @@ export default function CarsManager() {
     status: "พร้อมให้บริการ",
   });
   const [deleteId, setDeleteId] = useState(null);
+  const [editCar, setEditCar] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setLoading(true);
+    api.get("cars")
+      .then(res => setCars(res.data))
+      .catch(() => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .finally(() => setLoading(false));
+  }, []);
 
   // ฟังก์ชัน handle
   const handleFormChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
@@ -63,12 +73,41 @@ export default function CarsManager() {
     setForm({ image: null, imagePreview: "", name: "", desc: "", features: [""], prices: [""], conditions: [""], status: "พร้อมให้บริการ" });
   };
 
-  const handleDelete = (id) => {
-    setDeleteId(id);
+  const handleDelete = async (id) => {
+    try {
+      const confirm = await Swal.fire({
+        title: 'ยืนยันการลบ',
+        text: 'คุณต้องการลบรถคันนี้หรือไม่?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก',
+      });
+      if (!confirm.isConfirmed) return;
+      await api.delete(`cars/${id}`);
+      const res = await api.get("cars");
+      setCars(res.data);
+      Swal.fire({ icon: 'success', title: 'ลบรถสำเร็จ', timer: 1200, showConfirmButton: false });
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'ลบไม่สำเร็จ', text: err.response?.data?.error || err.message });
+    }
   };
-  const confirmDelete = () => {
-    setCars(cars => cars.filter(car => car.id !== deleteId));
-    setDeleteId(null);
+
+  const handleEdit = (car) => {
+    navigate(`/admin/cars/add?id=${car.id}`);
+  };
+
+  const handleEditSave = async () => {
+    try {
+      await api.put(`cars/${editCar.id}`, {
+        ...editCar,
+        ...editForm,
+      });
+      setCars(cars => cars.map(c => c.id === editCar.id ? { ...c, ...editForm } : c));
+      setShowEditModal(false);
+    } catch (err) {
+      alert('เกิดข้อผิดพลาด: ' + (err.response?.data?.error || err.message));
+    }
   };
 
   return (
@@ -91,40 +130,62 @@ export default function CarsManager() {
           <div className="font-bold text-xl text-blue-700">รายการรถทั้งหมด</div>
         </div>
         <div className="overflow-x-auto px-2 md:px-6 pb-8">
-          <table className="w-full bg-white text-base">
-            <thead>
-              <tr className="bg-blue-50 text-blue-700">
-                <th className="py-4 px-4 text-left font-bold text-base">รูป</th>
-                <th className="py-4 px-4 text-left font-bold text-base">ชื่อรถ</th>
-                <th className="py-4 px-4 text-left font-bold text-base">ราคา/วัน</th>
-                <th className="py-4 px-4 text-left font-bold text-base">สถานะ</th>
-                <th className="py-4 px-4 text-center font-bold text-base">ลบ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cars.map(car => (
-                <tr key={car.id} className="border-b last:border-b-0 hover:bg-blue-50/80 transition group">
-                  <td className="py-3 px-4">
-                    {car.image ? (
-                      <img src={car.image} alt={car.name} className="w-16 h-12 object-cover rounded-lg border border-blue-100 shadow" />
-                    ) : (
-                      <div className="w-16 h-12 flex items-center justify-center bg-blue-50 text-blue-200 rounded-lg border border-blue-100">
-                        <FiImage size={24} />
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-blue-900 font-semibold max-w-xs truncate group-hover:text-blue-700 text-base">{car.name}</td>
-                  <td className="py-3 px-4 text-blue-900 font-medium text-base">{car.price}</td>
-                  <td className="py-3 px-4"><StatusBadge status={car.status} /></td>
-                  <td className="py-3 px-4 text-center">
-                    <button onClick={() => handleDelete(car.id)} className="text-red-500 hover:text-red-700 p-2 rounded-full transition" title="ลบ">
-                      <FiTrash2 size={20} />
-                    </button>
-                  </td>
+          {loading ? (
+            <div className="py-12 text-center text-blue-400">Loading...</div>
+          ) : error ? (
+            <div className="py-12 text-center text-red-400">{error}</div>
+          ) : (
+            <table className="w-full bg-white text-base">
+              <thead>
+                <tr className="bg-blue-50 text-blue-700">
+                  <th className="py-4 px-4 text-left font-bold text-base">รูป</th>
+                  <th className="py-4 px-4 text-left font-bold text-base">ชื่อรถ</th>
+                  <th className="py-4 px-4 text-left font-bold text-base">ราคา/วัน</th>
+                  <th className="py-4 px-4 text-left font-bold text-base">สถานะ</th>
+                  <th className="py-4 px-4 text-center font-bold text-base">ลบ</th>
+                  <th className="py-4 px-4 text-center font-bold text-base">แก้ไข</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cars.map(car => (
+                  <tr key={car.id} className="border-b last:border-b-0 hover:bg-blue-50/80 transition group">
+                    <td className="py-3 px-4">
+                      {car.images && car.images.length > 0 ? (
+                        <img src={car.images[0]} alt={car.name} className="w-16 h-12 object-cover rounded-lg border border-blue-100 shadow" />
+                      ) : (
+                        <div className="w-16 h-12 flex items-center justify-center bg-blue-50 text-blue-200 rounded-lg border border-blue-100">
+                          <FiImage size={24} />
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-blue-900 font-semibold max-w-xs truncate group-hover:text-blue-700 text-base">{car.name}</td>
+                    <td className="py-3 px-4 text-blue-900 font-medium text-base">
+                      {Array.isArray(car.prices) && car.prices.length > 0 ? car.prices[0] : "-"}
+                    </td>
+                    <td className="py-3 px-4"><StatusBadge status={car.status} /></td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => handleDelete(car.id)}
+                        className="text-red-500 hover:text-red-700 p-2 rounded-full transition"
+                        title="ลบ"
+                      >
+                        <FiTrash2 size={20} />
+                      </button>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        className="text-blue-500 hover:text-blue-700 p-2 rounded-full transition"
+                        title="แก้ไข"
+                        onClick={() => handleEdit(car)}
+                      >
+                        <FiEdit2 size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
       {showModal && (
@@ -218,7 +279,36 @@ export default function CarsManager() {
             <div className="text-gray-500 mb-6 text-center">คุณต้องการลบรถคันนี้ออกจากระบบหรือไม่?</div>
             <div className="flex gap-4 w-full justify-center">
               <button className="px-5 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold" onClick={() => setDeleteId(null)}>ยกเลิก</button>
-              <button className="px-6 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-semibold shadow" onClick={confirmDelete}>ลบ</button>
+              <button className="px-6 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-semibold shadow" onClick={() => handleDelete(deleteId)}>ลบ</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal แก้ไขข้อมูลรถ */}
+      {showEditModal && editForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 w-full max-w-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">แก้ไขข้อมูลรถ</h2>
+            <input
+              className="w-full border rounded px-3 py-2 mb-3"
+              value={editForm.name}
+              onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="ชื่อรถ"
+            />
+            <select
+              className="w-full border rounded px-3 py-2 mb-3"
+              value={editForm.status}
+              onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))}
+            >
+              <option value="พร้อมให้บริการ">พร้อมให้บริการ</option>
+              <option value="ไม่พร้อมให้บริการ">ไม่พร้อมให้บริการ</option>
+            </select>
+            <div className="flex gap-2 justify-end mt-4">
+              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 rounded bg-gray-200">ยกเลิก</button>
+              <button
+                onClick={handleEditSave}
+                className="px-4 py-2 rounded bg-blue-600 text-white"
+              >บันทึก</button>
             </div>
           </div>
         </div>
