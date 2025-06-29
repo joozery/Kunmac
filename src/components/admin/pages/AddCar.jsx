@@ -24,40 +24,36 @@ export default function AddCar({ onAdd }) {
   const query = useQuery();
 
   // ดึงข้อมูลรถถ้าเป็นโหมดแก้ไข
+  const id = query.get('id');
   useEffect(() => {
-    const id = query.get('id');
-    console.log('edit id:', id); // debug id
-    if (id) {
-      setEditId(id);
-      setLoading(true);
-      api.get(`cars/${id}`)
-        .then(res => {
-          console.log('car data:', res.data); // debug data
-          const car = res.data;
-          if (!car || !car.id) {
-            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลรถ' });
-            return;
-          }
-          setForm({
-            images: [],
-            imagePreviews: Array.isArray(car.images) ? car.images : [],
-            name: car.name || "",
-            desc: car.desc || "",
-            features: Array.isArray(car.features) && car.features.length ? car.features : [""],
-            prices: Array.isArray(car.prices) && car.prices.length ? car.prices : [""],
-            conditions: Array.isArray(car.conditions) && car.conditions.length ? car.conditions : [""],
-            status: car.status || "พร้อมให้บริการ",
-          });
-        })
-        .catch((err) => {
-          console.log('API error:', err);
-          if (err.response && err.response.status === 404) {
-            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลรถ' });
-          }
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [query]);
+    if (!id) return;
+    setEditId(id);
+    setLoading(true);
+    api.get(`cars/${id}`)
+      .then(res => {
+        const car = res.data;
+        if (!car || !car.id) {
+          Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลรถ' });
+          return;
+        }
+        setForm({
+          images: [],
+          imagePreviews: Array.isArray(car.images) ? car.images : [],
+          name: car.name || "",
+          desc: car.desc || "",
+          features: Array.isArray(car.features) && car.features.length ? car.features : [""],
+          prices: Array.isArray(car.prices) && car.prices.length ? car.prices : [""],
+          conditions: Array.isArray(car.conditions) && car.conditions.length ? car.conditions : [""],
+          status: car.status || "พร้อมให้บริการ",
+        });
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 404) {
+          Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลรถ' });
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const handleFormChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
   const handleArrayChange = (field, idx, value) => setForm(f => ({ ...f, [field]: f[field].map((v, i) => i === idx ? value : v) }));
@@ -68,7 +64,6 @@ export default function AddCar({ onAdd }) {
   const handleImages = e => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    // preview
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = ev => {
@@ -82,12 +77,27 @@ export default function AddCar({ onAdd }) {
     });
   };
 
+  // ปรับ logic removeImage ให้รองรับ url เดิมกับ preview ใหม่
   const removeImage = idx => {
-    setForm(f => ({
-      ...f,
-      images: f.images.filter((_, i) => i !== idx),
-      imagePreviews: f.imagePreviews.filter((_, i) => i !== idx)
-    }));
+    setForm(f => {
+      const isOldUrl = typeof f.imagePreviews[idx] === 'string' && f.imagePreviews[idx].startsWith('http');
+      if (isOldUrl) {
+        // ลบเฉพาะ url เดิมออกจาก imagePreviews
+        return {
+          ...f,
+          imagePreviews: f.imagePreviews.filter((_, i) => i !== idx)
+        };
+      } else {
+        // นับจำนวน url เดิมก่อน idx เพื่อหาว่า idx นี้ตรงกับไฟล์ใหม่ index ไหน
+        const oldCount = f.imagePreviews.slice(0, idx).filter(url => typeof url === 'string' && url.startsWith('http')).length;
+        const newIdx = idx - oldCount;
+        return {
+          ...f,
+          images: f.images.filter((_, i) => i !== newIdx),
+          imagePreviews: f.imagePreviews.filter((_, i) => i !== idx)
+        };
+      }
+    });
   };
 
   const handleSubmit = async e => {

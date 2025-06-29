@@ -51,17 +51,22 @@ router.get('/cars', async (req, res) => {
 
 // ✅ GET: รถทีละคัน
 router.get('/cars/:id', async (req, res) => {
-  const { id } = req.params;
-  const [[car]] = await db.promise().query('SELECT * FROM cars WHERE id = ?', [id]);
-  if (!car) return res.status(404).json({ error: 'Car not found' });
-
-  const [images] = await db.promise().query('SELECT image_url FROM car_images WHERE car_id = ?', [car.id]);
-  car.images = images.map(img => img.image_url);
-  car.features = JSON.parse(car.features || '[]');
-  car.prices = JSON.parse(car.prices || '[]');
-  car.conditions = JSON.parse(car.conditions || '[]');
-  res.json(car);
-});
+    const { id } = req.params;
+  
+    const [[car]] = await db.promise().query('SELECT * FROM cars WHERE id = ?', [id]); // ✅ ต้องตรวจสอบว่าไม่ค้าง
+  
+    if (!car) return res.status(404).json({ error: 'Car not found' });
+  
+    const [images] = await db.promise().query('SELECT image_url FROM car_images WHERE car_id = ?', [car.id]); // ✅ อันนี้ก็ไม่ควร delay
+    car.images = images.map(img => img.image_url);
+  
+    car.features = JSON.parse(car.features || '[]');
+    car.prices = JSON.parse(car.prices || '[]');
+    car.conditions = JSON.parse(car.conditions || '[]');
+  
+    res.json(car);
+  });
+  
 
 // ✅ PUT: แก้ไขรถ
 router.put('/cars/:id', upload.array('images', 10), async (req, res) => {

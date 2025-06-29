@@ -2,6 +2,7 @@ import { useSidebar } from "./SidebarContext";
 import { NavLink } from "react-router-dom";
 import { FiHome, FiTruck, FiFileText, FiMail, FiSettings, FiLogOut, FiChevronLeft, FiChevronRight, FiImage, FiVideo } from "react-icons/fi";
 import { motion } from "framer-motion";
+import logo from '@/assets/logo.png';
 
 const mainMenu = [
   { key: "overview", label: "Dashboard", icon: <FiHome />, to: "/admin" },
@@ -20,6 +21,17 @@ const sidebarVariants = {
 
 export default function Sidebar() {
   const { collapsed, setCollapsed } = useSidebar();
+  let user = null;
+  try {
+    const auth = localStorage.getItem('admin-auth');
+    if (auth) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) user = JSON.parse(userStr);
+    }
+  } catch {}
+  const displayName = user?.name || 'Admin';
+  const displayRole = user?.role || 'Administrator';
+  const avatarUrl = user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg';
   return (
     <motion.aside
       className="min-h-screen flex flex-col border-r border-gray-100 shadow-2xl relative z-40 pt-8 bg-gradient-to-b from-white via-blue-50 to-white"
@@ -37,8 +49,8 @@ export default function Sidebar() {
       </button>
       {/* Logo */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }} className={`flex items-center gap-3 mb-10 transition-all duration-300 ${collapsed ? 'justify-center' : 'pl-6'}`} style={{ minHeight: 56 }}>
-        <div className="bg-gradient-to-tr from-blue-200 to-blue-500 rounded-xl p-2 shadow-lg">
-          <svg width="36" height="36" viewBox="0 0 32 32" fill="none"><path d="M16 4L28 28H4L16 4Z" fill="#1976D2"/></svg>
+        <div className="rounded-xl p-2 shadow-lg">
+          <img src={logo} alt="logo" className="w-9 h-9 object-contain" />
         </div>
         {!collapsed && <span className="font-extrabold text-xl text-blue-700 tracking-wide whitespace-nowrap drop-shadow">ระบบจัดการรถ</span>}
       </motion.div>
@@ -67,14 +79,19 @@ export default function Sidebar() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
-        className={`mx-4 mb-6 p-4 rounded-2xl bg-white/80 shadow-lg flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}
+        className={`mx-4 mb-6 p-4 rounded-2xl bg-white/80 shadow-lg flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}
         style={{ minHeight: 56 }}
       >
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" className="w-11 h-11 rounded-full object-cover border-2 border-blue-200 shadow" />
+        <img
+          src={avatarUrl}
+          alt="avatar"
+          className="w-11 h-11 rounded-full object-cover border-2 border-blue-200 shadow"
+          style={collapsed ? { margin: '0 auto', display: 'block' } : {}}
+        />
         {!collapsed && (
           <div>
-            <div className="font-bold text-gray-800 text-base">Mathew</div>
-            <div className="text-xs text-gray-400">Designer</div>
+            <div className="font-bold text-gray-800 text-base">{displayName}</div>
+            <div className="text-xs text-gray-400">{displayRole}</div>
           </div>
         )}
       </motion.div>

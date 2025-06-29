@@ -27,6 +27,8 @@ import PortfolioManager from './components/admin/pages/PortfolioManager';
 import YoutubeManager from './components/admin/pages/YoutubeManager';
 import PortfolioDetail from './components/PortfolioDetail';
 import api from './lib/api';
+import AdminLogin from './components/admin/pages/AdminLogin';
+import AdminProtectedRoute from './components/admin/pages/AdminProtectedRoute';
 
 import carImage1 from './assets/car1.jpg';
 import carImage2 from './assets/car2.jpg';
@@ -150,10 +152,11 @@ function App() {
 
   return (
     <Routes>
+      <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/*" element={
-        <AdminRoute>
+        <AdminProtectedRoute>
           <AdminLayout />
-        </AdminRoute>
+        </AdminProtectedRoute>
       }>
         <Route index element={<DashboardHome />} />
         <Route path="cars" element={<CarsManager />} />
